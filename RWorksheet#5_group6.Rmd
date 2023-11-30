@@ -1,0 +1,85 @@
+---
+title: "RWorksheet#5_Group6"
+author: "Bagilidad, Calopez, De Guzman, Talon"
+date: "2023-11-29"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(rvest)
+library(dplyr)
+library(polite)
+
+url<- "https://www.imdb.com/list/ls025873927/"
+  
+session <- bow(url, user_agent = "For Educational Purposes")
+
+imdb <- read_html(url)
+
+ranks <- scrape(session) %>%
+html_nodes("span.lister-item-index.unbold.text-primary") %>%
+  html_text
+ranks
+
+
+titles <- scrape(session) %>%
+  html_nodes("a[href='/title/tt0306414/?ref_=ttls_li_tt']") %>%
+  html_text
+titles
+
+ratings <- scrape(session) %>%
+html_nodes("span.ipl-rating-star__rating") %>%
+  html_text
+ratings
+
+people_vote <- scrape(session)%>%
+  html_nodes("")%>%
+  html_text
+people_vote
+
+```
+
+```{r}
+library(rvest)
+library(dplyr)
+library(polite)
+
+url<- "https://www.imdb.com/chart/tvmeter/"
+  
+session <- bow(url, user_agent = "For Educational Purposes")
+
+imdb <- read_html(url)
+
+ranks <- scrape(session) %>%
+html_nodes("div.sc-94da5b1b-0.soBIM.meter-const-ranking.sc-479faa3c-6.glWBvR.cli-meter-title-header") %>%
+  html_text
+ranks
+
+
+titles <- scrape(session) %>%
+  html_nodes("h3.ipc-title__text") %>%
+  html_text
+titles
+
+
+ratings <- scrape(session) %>%
+html_nodes("span.ipc-rating-star.ipc-rating-star--base.ipc-rating-star--imdb.ratingGroup--imdb-rating") %>%
+  html_text
+ratings50 <- ratings[1:50]
+
+people_vote <- scrape(session)%>%
+  html_nodes("span.ipc-rating-star--voteCount")%>%
+  html_text
+people_vote
+
+top50 <- as.data.frame(Rank = ranks,
+                       Titles = titles[2:51],
+                       Ratings = ratings)
+top50
+
+
+```
