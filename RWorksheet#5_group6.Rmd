@@ -8,78 +8,464 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+1. Each group needs to extract the top 50 tv shows in Imdb.com. It will include the rank, the title of the
+tv show, tv rating, the number of people who voted, the number of episodes, the year it was released.
+
 
 ```{r}
+install.packages("rvest")
+install.packages("dplyr")
+install.packages("polite")
+install.packages("tidyverse")
+
 library(rvest)
 library(dplyr)
 library(polite)
-
-url<- "https://www.imdb.com/list/ls025873927/"
-  
-session <- bow(url, user_agent = "For Educational Purposes")
-
-imdb <- read_html(url)
-
-ranks <- scrape(session) %>%
-html_nodes("span.lister-item-index.unbold.text-primary") %>%
-  html_text
-ranks
-
-
-titles <- scrape(session) %>%
-  html_nodes("a[href='/title/tt0306414/?ref_=ttls_li_tt']") %>%
-  html_text
-titles
-
-ratings <- scrape(session) %>%
-html_nodes("span.ipl-rating-star__rating") %>%
-  html_text
-ratings
-
-people_vote <- scrape(session)%>%
-  html_nodes("")%>%
-  html_text
-people_vote
-
-```
-
-```{r}
-library(rvest)
-library(dplyr)
-library(polite)
+library(tidyverse)
 
 url<- "https://www.imdb.com/chart/tvmeter/"
-  
+ 
 session <- bow(url, user_agent = "For Educational Purposes")
 
 imdb <- read_html(url)
 
+#ranks
 ranks <- scrape(session) %>%
-html_nodes("div.sc-94da5b1b-0.soBIM.meter-const-ranking.sc-479faa3c-6.glWBvR.cli-meter-title-header") %>%
+html_nodes("div.sc-94da5b1b-0") %>%
   html_text
 ranks
+cleaned_ranks <- substr(ranks,1,2)
 
+ranks50<- cleaned_ranks[1:50]
+ranks50
 
+#titles
 titles <- scrape(session) %>%
   html_nodes("h3.ipc-title__text") %>%
   html_text
 titles
+titles50 <- titles[2:51]
+titles50
 
-
+#ratings
 ratings <- scrape(session) %>%
 html_nodes("span.ipc-rating-star.ipc-rating-star--base.ipc-rating-star--imdb.ratingGroup--imdb-rating") %>%
   html_text
-ratings50 <- ratings[1:50]
 
+cleaned_ratings <- substr(ratings,1,3)
+cleaned_ratings
+ratings50 <- cleaned_ratings[1:50]
+ratings50
+
+
+#peoples vote
 people_vote <- scrape(session)%>%
   html_nodes("span.ipc-rating-star--voteCount")%>%
-  html_text
-people_vote
+  html_text()
 
-top50 <- as.data.frame(Rank = ranks,
-                       Titles = titles[2:51],
-                       Ratings = ratings)
-top50
+people_vote50 <- people_vote[1:50]
+people_vote50
+
+cleaned_vote <- gsub("\\(|\\)", "", people_vote50)
+cleaned_vote
+
+#episodes
+
+episodes <- scrape(session)%>%
+  html_nodes("span.sc-43986a27-8:nth-of-type(2)") %>%
+  html_text()
+episodes50 <- episodes[1:50]
+episodes50
+
+
+#year
+year <- scrape(session)%>%
+  html_nodes("span.sc-43986a27-8:nth-of-type(1)") %>%
+  html_text()
+year50 <- year[1:50]
+year50
+
+#dataframe
+topTv_df <- data.frame(Titles = titles50,
+                       Ranks = ranks50,
+                       Ratings = ratings50,
+                       People_Votes = cleaned_vote,
+                       Episodes = episodes50,
+                       Year = year50
+                       )
+topTv_df
 
 
 ```
+
+2. From the 50 tv shows, select at least 5 tv shows to scrape the user reviews that will include the
+reviewer’s name, date of reviewed, user rating, title of the review, and text reviews.
+
+```{r}
+
+#First tv show: Breaking Bad
+
+BreakingBad_Link <- "https://www.imdb.com/title/tt0903747/reviews?ref_=tt_urv"
+session2 <- bow(BreakingBad_Link, user_agent = "Educational Purposes")
+session2
+
+#Reviewers data for Breaking Bad
+BreakingBad_Title <- scrape(session2)%>%
+  html_nodes("a[itemprop='url']") %>%
+  html_text()
+BreakingBad_Title
+
+BreakingBad_RevName <- scrape(session2)%>%
+  html_nodes(".display-name-link a") %>%
+  html_text()
+BreakingBad_RevName
+
+BreakingBad_RevDate <- scrape(session2) %>%
+  html_nodes("span.review-date") %>%
+  html_text()
+BreakingBad_RevDate
+
+BreakingBad_UserRating <- scrape(session2) %>%
+  html_nodes("span.rating-other-user-rating") %>%
+  html_text() %>% str_trim()
+BreakingBad_UserRating
+
+BreakingBad_TitleRev <- scrape(session2) %>%
+  html_nodes(" a.title") %>%
+  html_text()
+BreakingBad_TitleRev2 <- gsub("\n ","", BreakingBad_TitleRev)
+BreakingBad_TitleRev2
+
+BreakingBad_TextRev <- scrape(session2) %>%
+  html_nodes("div.text") %>%
+  html_text()
+BreakingBad_TextRev
+
+BreakingBad_Df <- data.frame(Tv_Shows = BreakingBad_Title,
+                             Reviewer_Name = BreakingBad_RevName,
+                             Reviewer_Date = BreakingBad_RevDate,
+                             Reviewer_Rating = BreakingBad_UserRating,
+                             Title_Review = BreakingBad_TitleRev2,
+                             Text_Review = BreakingBad_TextRev)
+BreakingBad_Df
+
+
+
+
+#Second TV Show: The Boys
+
+TheBoys_Link <- "https://www.imdb.com/title/tt1190634/reviews/?ref_=tt_ql_2"
+session3 <- bow(TheBoys_Link, user_agent = "Educational Purposes")
+session3
+
+#Reviewers data for The Boys
+TheBoys_Title <- scrape(session3)%>%
+  html_nodes("a[itemprop='url']") %>%
+  html_text()
+TheBoys_Title
+
+TheBoys_RevName <- scrape(session3)%>%
+  html_nodes(".display-name-link a") %>%
+  html_text()
+TheBoys_RevName
+
+TheBoys_RevDate <- scrape(session3) %>%
+  html_nodes("span.review-date") %>%
+  html_text()
+TheBoys_RevDate
+
+TheBoys_UserRating <- scrape(session3) %>%
+  html_nodes("span.rating-other-user-rating") %>%
+  html_text() %>% str_trim()
+TheBoys_UserRating
+
+
+TheBoys_TitleRev <- scrape(session3) %>%
+  html_nodes(" a.title") %>%
+  html_text() %>% str_trim()
+TheBoys_TitleRev
+
+
+TheBoys_TextRev <- scrape(session3) %>%
+  html_nodes("div.text") %>%
+  html_text()
+TheBoys_TextRev
+
+TheBoys_Df <- data.frame(Tv_Shows = TheBoys_Title,
+                         Reviewer_Name = TheBoys_RevName[1:15],
+                         Reviewer_Date = TheBoys_RevDate[1:15],
+                         Reviewer_Rating = TheBoys_UserRating[1:15],
+                         Title_Review = TheBoys_TitleRev[1:15],
+                         Text_Review = TheBoys_TextRev[1:15])
+TheBoys_Df
+
+#Third TV Show: Game of Thrones
+
+GameofThrones_Link <- "https://www.imdb.com/title/tt0944947/reviews/?ref_=tt_ql_2"
+session4 <- bow(GameofThrones_Link, user_agent = "Educational Purposes")
+session4
+
+#Reviewers data for Game of Thrones
+GameofThrones_Title <- scrape(session4)%>%
+  html_nodes("a[itemprop='url']") %>%
+  html_text()
+GameofThrones_Title
+
+
+
+GameofThrones_RevName <- scrape(session4)%>%
+  html_nodes(".display-name-link a") %>%
+  html_text()
+GameofThrones_RevName
+
+GameofThrones_RevDate <- scrape(session4) %>%
+  html_nodes("span.review-date") %>%
+  html_text()
+GameofThrones_RevDate
+
+GameofThrones_UserRating <- scrape(session4) %>%
+  html_nodes("span.rating-other-user-rating") %>%
+  html_text() %>% str_trim()
+GameofThrones_UserRating
+
+
+GameofThrones_TitleRev <- scrape(session4) %>%
+  html_nodes(" a.title") %>%
+  html_text() %>% str_trim()
+GameofThrones_TitleRev
+
+
+GameofThrones_TextRev <- scrape(session4) %>%
+  html_nodes("div.text") %>%
+  html_text()
+GameofThrones_TextRev
+
+GameofThrones_Df <- data.frame( Tv_Shows = GameofThrones_Title,
+                                Reviewer_Name = GameofThrones_RevName[1:15],
+                                Reviewer_Date = GameofThrones_RevDate[1:15],
+                                Reviewer_Rating = GameofThrones_UserRating[1:15],
+                                Title_Review = GameofThrones_TitleRev[1:15],
+                                Text_Review = GameofThrones_TextRev[1:15])
+GameofThrones_Df
+
+
+#Fourth TV Show: Rick and Morty
+
+RickMorty_Link <- "https://www.imdb.com/title/tt2861424/reviews/?ref_=tt_ql_2"
+session5 <- bow(RickMorty_Link, user_agent = "Educational Purposes")
+session5
+
+#Reviewers data for Rick and Morty
+RickMorty_Title <- scrape(session5)%>%
+  html_nodes("a[itemprop='url']") %>%
+  html_text()
+RickMorty_Title
+
+RickMorty_RevName <- scrape(session5)%>%
+  html_nodes(".display-name-link a") %>%
+  html_text()
+RickMorty_RevName
+
+RickMorty_RevDate <- scrape(session5) %>%
+  html_nodes("span.review-date") %>%
+  html_text()
+RickMorty_RevDate
+
+RickMorty_UserRating <- scrape(session5) %>%
+  html_nodes("span.rating-other-user-rating") %>%
+  html_text() %>% str_trim()
+RickMorty_UserRating
+
+
+RickMorty_TitleRev <- scrape(session5) %>%
+  html_nodes(" a.title") %>%
+  html_text() %>% str_trim()
+RickMorty_TitleRev
+
+
+RickMorty_TextRev <- scrape(session5) %>%
+  html_nodes("div.text") %>%
+  html_text()
+RickMorty_TextRev
+
+RickMorty_Df <- data.frame(  Tv_Shows = RickMorty_Title,
+                             Reviewer_Name = RickMorty_RevName[1:15],
+                             Reviewer_Date = RickMorty_RevDate[1:15],
+                             Reviewer_Rating = RickMorty_UserRating[1:15],
+                             Title_Review = RickMorty_TitleRev[1:15],
+                             Text_Review = RickMorty_TextRev[1:15])
+RickMorty_Df
+
+
+#Fifth TV Show: The Office
+
+TheOffice_Link <- "https://www.imdb.com/title/tt0386676/reviews/?ref_=tt_ql_2"
+session6 <- bow(TheOffice_Link, user_agent = "Educational Purposes")
+session6
+
+#Reviewers data for The Office
+
+TheOffice_Title <- scrape(session6)%>%
+  html_nodes("a[itemprop='url']") %>%
+  html_text()
+TheOffice_Title
+
+TheOffice_RevName <- scrape(session6)%>%
+  html_nodes(".display-name-link a") %>%
+  html_text()
+TheOffice_RevName
+
+TheOffice_RevDate <- scrape(session6) %>%
+  html_nodes("span.review-date") %>%
+  html_text()
+TheOffice_RevDate
+
+TheOffice_UserRating <- scrape(session6) %>%
+  html_nodes("span.rating-other-user-rating") %>%
+  html_text() %>% str_trim()
+TheOffice_UserRating
+
+
+TheOffice_TitleRev <- scrape(session6) %>%
+  html_nodes(" a.title") %>%
+  html_text() %>% str_trim()
+TheOffice_TitleRev
+
+
+TheOffice_TextRev <- scrape(session6) %>%
+  html_nodes("div.text") %>%
+  html_text()
+TheOffice_TextRev
+
+TheOffice_Df <- data.frame(  Tv_Show = TheOffice_Title,
+                             Reviewer_Name = TheOffice_RevName[1:15],
+                             Reviewer_Date = TheOffice_RevDate[1:15],
+                             Reviewer_Rating = TheOffice_UserRating[1:15],
+                             Title_Review = TheOffice_TitleRev[1:15],
+                             Text_Review = TheOffice_TextRev[1:15])
+TheOffice_Df
+
+
+TvShows_Bind <- rbind(BreakingBad_Df,TheBoys_Df,GameofThrones_Df,RickMorty_Df,TheBoys_Df)
+TvShows_Bind
+
+```
+3. Create a time series graph for the tv shows released by year. Which year has the most number of tv
+shows released?
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+ggplot(topTv_df, aes(x = Year, fill = Year)) +
+  geom_bar() +
+  labs(title = "Number of TV Shows Released by Year",
+       x = "Year",
+       y = "Number of TV Shows") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),
+axis.text.x = element_text(angle = 44, hjust = 1))
+
+
+
+cat("The year with the most number of tv shows is", topTv_df$Year[1])
+```
+
+4. Select 3 products from Amazon of the same category. Extract the price, description, ratings and
+reviews of each product.
+install.packages("rvest")
+install.packages("dplyr")
+install.packages("polite")
+install.packages("tidyverse")
+```{r}
+# FIRST ITEM
+library(rvest)
+library(dplyr)
+library(polite)
+library(tidyverse)
+
+item1 <- "https://www.amazon.com/SteelSeries-Worlds-Fastest-Mechanical-Keyboard/dp/B0BF64DN6H/ref=sr_1_10?_encoding=UTF8&content-id=amzn1.sym.12129333-2117-4490-9c17-6d31baf0582a&keywords=gaming%2Bkeyboard&pd_rd_r=0f6ba081-7c35-4aa4-bc81-6422dc3dfb37&pd_rd_w=qsoSW&pd_rd_wg=5V8Nr&pf_rd_p=12129333-2117-4490-9c17-6d31baf0582a&pf_rd_r=6GPK37Q4SVBEWJXAB6A4&qid=1702295919&sr=8-10&th=1"
+session1 <- html_session(item1, user_agent = "Educational Purposes")
+
+price1 <- session1 %>%
+  html_nodes('span.a-offscreen')%>%
+  html_text()%>%
+  trimws()
+price1
+
+description1 <- session1 %>%
+  html_nodes('.a-unordered-list .a-list-item') %>%
+  html_text() %>%
+  trimws()
+description1
+
+prodrating1 <- session1 %>%
+  html_nodes('.a-icon-star .a-icon-alt') %>%
+  html_text() %>%
+  trimws()
+prodrating1
+
+prodreview1 <- session1 %>%
+  html_nodes('#acrCustomerReviewText') %>%
+  html_text() %>%
+  trimws()
+prodreview1
+
+# SECOND ITEM
+item2 <- "https://www.amazon.com/MageGee-Keyboard-Waterproof-Backlit-Computer/dp/B08NSXRQ98/ref=sr_1_9?_encoding=UTF8&content-id=amzn1.sym.12129333-2117-4490-9c17-6d31baf0582a&keywords=gaming%2Bkeyboard&pd_rd_r=0f6ba081-7c35-4aa4-bc81-6422dc3dfb37&pd_rd_w=qsoSW&pd_rd_wg=5V8Nr&pf_rd_p=12129333-2117-4490-9c17-6d31baf0582a&pf_rd_r=6GPK37Q4SVBEWJXAB6A4&qid=1702295919&sr=8-9&th=1"
+session2 <- html_session(item2, user_agent = "Educational Purposes")
+
+price2 <- session1 %>%
+  html_nodes('.a-offscreen')%>%
+  html_text()%>%
+  trimws()
+price2
+
+description2 <- session2 %>%
+  html_nodes('.a-unordered-list .a-list-item') %>%
+  html_text() %>%
+  trimws()
+description2
+
+prodrating2 <- session2 %>%
+  html_nodes('.a-icon-star .a-icon-alt') %>%
+  html_text() %>%
+  trimws()
+prodrating2
+
+prodreview2 <- session2 %>%
+  html_nodes('#acrCustomerReviewText') %>%
+  html_text() %>%
+  trimws()
+prodreview2
+
+# THIRD ITEM
+item3 <- "https://www.amazon.com/RK-ROYAL-KLUDGE-Mechanical-Ultra-Compact/dp/B089GN2KBT/ref=sr_1_8?_encoding=UTF8&content-id=amzn1.sym.12129333-2117-4490-9c17-6d31baf0582a&keywords=gaming%2Bkeyboard&pd_rd_r=0f6ba081-7c35-4aa4-bc81-6422dc3dfb37&pd_rd_w=qsoSW&pd_rd_wg=5V8Nr&pf_rd_p=12129333-2117-4490-9c17-6d31baf0582a&pf_rd_r=6GPK37Q4SVBEWJXAB6A4&qid=1702295919&sr=8-8&th=1"
+session3 <- html_session(item3, user_agent = "Educational Purposes")
+
+price3 <- session3 %>%
+  html_nodes('#priceblock_ourprice') %>%
+  html_text() %>%
+  trimws()
+price3
+
+description3 <- session3 %>%
+  html_nodes('.a-unordered-list .a-list-item') %>%
+  html_text() %>%
+  trimws()
+description3
+
+prodrating3 <- session3 %>%
+  html_nodes('.a-icon-star .a-icon-alt') %>%
+  html_text() %>%
+  trimws()
+prodrating3
+
+prodreview3 <- session3 %>%
+  html_nodes('#acrCustomerReviewText') %>%
+  html_text() %>%
+  trimws()
+prodreview3
+
+```
+
