@@ -1,0 +1,89 @@
+---
+title: "Sentimental Analysis Breaking Bad"
+author: "Bagilidad,Calopez,Talon,De Guzman"
+date: "2023-12-22"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(readr)
+library(tm)
+library(NLP)
+library(wordcloud)
+library(RColorBrewer)
+
+
+#scraped and cleaned 300 reviews from Breaking Bad in csv
+ratings_BreakingBad <-read.csv("BreakingBad_Ratings.csv")
+ratings_BreakingBad
+
+#sentimentalAnalysis Ratings 
+
+
+BreakingBad_Sentiment <- ifelse(ratings_BreakingBad$rating > 5, "Positive",
+                                ifelse(ratings_BreakingBad$rating == 5, "Average",
+                                       "Negative"))
+BreakingBad_Sentiment
+
+#Corpus for text analysis
+
+BreakingBad_Corpus <- Corpus(VectorSource(ratings_BreakingBad$text))
+
+#To lowercase
+BreakingBad_Corpus <- tm_map(BreakingBad_Corpus, content_transformer(tolower))
+
+# Remove Eng. stop words
+
+BreakingBad_Corpus <- tm_map(BreakingBad_Corpus, removeWords, stopwords("en"))
+
+# document term matrix
+
+BreakingBad_DTM <- DocumentTermMatrix(BreakingBad_Corpus)
+
+```
+#Generate a Word Cloud
+```{r}
+library(wordcloud)
+BreakingBad_worldcloud<- wordcloud(words = names(sort(colSums(as.matrix(BreakingBad_DTM)))), 
+          freq = sort(colSums(as.matrix(BreakingBad_DTM))),
+          min.freq = 1,
+          scale = c(3, 0.5),
+          max.words = 200, # Limit the number of words displayed
+          random.order = FALSE, # Display words in decreasing frequency
+          colors = brewer.pal(8, "Dark2"))
+
+BreakingBad_worldcloud
+
+```
+
+
+```{r}
+
+library(ggplot2)
+
+#  data frame from the sentiment analysis results
+sentiment <- data.frame(Legend = BreakingBad_Sentiment)
+
+#  order of legend and bars
+order_levels <- c("Negative", "Average", "Positive")
+
+# Plot sentiment distribution
+ggplot(sentiment, aes(x = Legend, fill = Legend)) +
+  geom_bar() +
+  labs(title = "Sentimental Analysis",
+       x = "Ratings",
+       y = "Number Of Reviewers") +
+  scale_fill_manual(values = c("Negative" = "red", "Average" = "grey", "Positive" = "green")) +
+  scale_x_discrete(limits = order_levels)
+
+
+```
+
+This graph shows that the Breaking Bad tv series is a successful hit. Out of the 300 reviews, it got almost all of the positive reviews. This Tv show can be liked by those who want's action, comedy, crime and drama.
