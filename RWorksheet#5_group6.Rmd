@@ -13,10 +13,10 @@ tv show, tv rating, the number of people who voted, the number of episodes, the 
 
 
 ```{r}
-install.packages("rvest")
-install.packages("dplyr")
-install.packages("polite")
-install.packages("tidyverse")
+#install.packages("rvest")
+#install.packages("dplyr")
+#install.packages("polite")
+#install.packages("tidyverse")
 
 library(rvest)
 library(dplyr)
@@ -373,22 +373,27 @@ cat("The year with the most number of tv shows is", topTv_df$Year[1])
 
 4. Select 3 products from Amazon of the same category. Extract the price, description, ratings and
 reviews of each product.
-install.packages("rvest")
-install.packages("dplyr")
-install.packages("polite")
-install.packages("tidyverse")
+
 ```{r}
-# FIRST ITEM
+#install.packages("rvest")
+#install.packages("dplyr")
+#install.packages("polite")
+#install.packages("tidyverse")
+
 library(rvest)
 library(dplyr)
 library(polite)
 library(tidyverse)
 
-item1 <- "https://www.amazon.com/SteelSeries-Worlds-Fastest-Mechanical-Keyboard/dp/B0BF64DN6H/ref=sr_1_10?_encoding=UTF8&content-id=amzn1.sym.12129333-2117-4490-9c17-6d31baf0582a&keywords=gaming%2Bkeyboard&pd_rd_r=0f6ba081-7c35-4aa4-bc81-6422dc3dfb37&pd_rd_w=qsoSW&pd_rd_wg=5V8Nr&pf_rd_p=12129333-2117-4490-9c17-6d31baf0582a&pf_rd_r=6GPK37Q4SVBEWJXAB6A4&qid=1702295919&sr=8-10&th=1"
+
+# FIRST ITEM
+item1 <- "www.amazon.com/SteelSeries-Worlds-Fastest-Mechanical-Keyboard/dp/B0BF64DN6H/ref=sr_1_10?_encoding=UTF8&content-id=amzn1.sym.12129333-2117-4490-9c17-6d31baf0582a&keywords=gaming%2Bkeyboard&pd_rd_r=0f6ba081-7c35-4aa4-bc81-6422dc3dfb37&pd_rd_w=qsoSW&pd_rd_wg=5V8Nr&pf_rd_p=12129333-2117-4490-9c17-6d31baf0582a&pf_rd_r=6GPK37Q4SVBEWJXAB6A4&qid=1702295919&sr=8-10&th=1"
 session1 <- html_session(item1, user_agent = "Educational Purposes")
 
+session1
+
 price1 <- session1 %>%
-  html_nodes('span.a-offscreen')%>%
+  html_nodes('#corePriceDisplay_desktop_feature_div .a-price-whole')%>%
   html_text()%>%
   trimws()
 price1
@@ -412,7 +417,7 @@ prodreview1 <- session1 %>%
 prodreview1
 
 # SECOND ITEM
-item2 <- "https://www.amazon.com/MageGee-Keyboard-Waterproof-Backlit-Computer/dp/B08NSXRQ98/ref=sr_1_9?_encoding=UTF8&content-id=amzn1.sym.12129333-2117-4490-9c17-6d31baf0582a&keywords=gaming%2Bkeyboard&pd_rd_r=0f6ba081-7c35-4aa4-bc81-6422dc3dfb37&pd_rd_w=qsoSW&pd_rd_wg=5V8Nr&pf_rd_p=12129333-2117-4490-9c17-6d31baf0582a&pf_rd_r=6GPK37Q4SVBEWJXAB6A4&qid=1702295919&sr=8-9&th=1"
+item2 <- "www.amazon.com/MageGee-Keyboard-Waterproof-Backlit-Computer/dp/B08NSXRQ98/ref=sr_1_9?_encoding=UTF8&content-id=amzn1.sym.12129333-2117-4490-9c17-6d31baf0582a&keywords=gaming%2Bkeyboard&pd_rd_r=0f6ba081-7c35-4aa4-bc81-6422dc3dfb37&pd_rd_w=qsoSW&pd_rd_wg=5V8Nr&pf_rd_p=12129333-2117-4490-9c17-6d31baf0582a&pf_rd_r=6GPK37Q4SVBEWJXAB6A4&qid=1702295919&sr=8-9&th=1"
 session2 <- html_session(item2, user_agent = "Educational Purposes")
 
 price2 <- session1 %>%
@@ -440,7 +445,7 @@ prodreview2 <- session2 %>%
 prodreview2
 
 # THIRD ITEM
-item3 <- "https://www.amazon.com/RK-ROYAL-KLUDGE-Mechanical-Ultra-Compact/dp/B089GN2KBT/ref=sr_1_8?_encoding=UTF8&content-id=amzn1.sym.12129333-2117-4490-9c17-6d31baf0582a&keywords=gaming%2Bkeyboard&pd_rd_r=0f6ba081-7c35-4aa4-bc81-6422dc3dfb37&pd_rd_w=qsoSW&pd_rd_wg=5V8Nr&pf_rd_p=12129333-2117-4490-9c17-6d31baf0582a&pf_rd_r=6GPK37Q4SVBEWJXAB6A4&qid=1702295919&sr=8-8&th=1"
+item3 <- "www.amazon.com/RK-ROYAL-KLUDGE-Mechanical-Ultra-Compact/dp/B089GN2KBT/ref=sr_1_8?_encoding=UTF8&content-id=amzn1.sym.12129333-2117-4490-9c17-6d31baf0582a&keywords=gaming%2Bkeyboard&pd_rd_r=0f6ba081-7c35-4aa4-bc81-6422dc3dfb37&pd_rd_w=qsoSW&pd_rd_wg=5V8Nr&pf_rd_p=12129333-2117-4490-9c17-6d31baf0582a&pf_rd_r=6GPK37Q4SVBEWJXAB6A4&qid=1702295919&sr=8-8&th=1"
 session3 <- html_session(item3, user_agent = "Educational Purposes")
 
 price3 <- session3 %>%
